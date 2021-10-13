@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "modbus_slave.h": "c",
+        "stdbool.h": "c",
+        "user_config.h": "c"
+    }
+}
