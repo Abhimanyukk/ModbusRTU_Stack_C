@@ -13,10 +13,10 @@
 // #define COIL_ADDRESS        "aaa"
 // #define COIL_STATUS         {true, false, true, true, false, true, true, false, true, true, false, true, true, false, false, true}
 
-typedef struct DataBase
-{
-    uint8_t *coil_address;
-    uint8_t *coil_status;
-}dataBase_t;
+// typedef struct __attribute__((packed, scalar_storage_order("big-endian"))) DataBase
+// {
+//     uint16_t *coil_address;
+//     uint8_t *coil_status;
+// }dataBase_t;
 
 #endif // USER_CONFIG_H

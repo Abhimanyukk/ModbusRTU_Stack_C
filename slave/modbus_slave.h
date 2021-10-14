@@ -2,11 +2,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdlib.h>
 
-#define VALUE 6
-
-// #define SUCCESS         true
-// #define ERROR           false
+#define MODBUS_REGISTER_OFFSET  0
 
 typedef uint8_t error_t;
 enum error_t
@@ -14,7 +12,8 @@ enum error_t
     SUCCESS = 0,
     ERROR,
     WRONG_SLAVE_ID,
-    INVALID_FUNCTION_CODE
+    INVALID_FUNCTION_CODE,
+    NO_ADDRESS_FOUND
 };
 
 typedef uint8_t function_code_t;
@@ -41,15 +40,16 @@ typedef struct __attribute__((packed, scalar_storage_order("big-endian"))) Modbu
 } modbusRequestFrame_t;
 
 #pragma pack(1)
-typedef struct __attribute__((packed, scalar_storage_order("big-endian"))) ModbusResponseFrame
+typedef struct __attribute__((packed, scalar_storage_order("big-endian"))) ModbusResponseHeader
 {
-    uint8_t slave_id;
-    function_code_t function_code;
-    uint8_t byte_count;
-    uint8_t *data;
-    uint16_t crc;
-} modbusResponseFrame_t;
+    uint8_t slave_id;                   // 1
+    function_code_t function_code;      // 1
+    uint8_t byte_count;                 // 1
+    // uint8_t *data;                      
+    // uint16_t crc;                       // 2
+} modbusResponseHeader_t;                // 5 + len of data
 
-error_t GetResponse(uint8_t *poll_request, uint8_t *response, uint8_t *response_length, uint8_t slave_id);
-error_t ReadCoil(uint16_t starting_address, uint8_t *no_of_bytes, uint8_t *data);
-int slave();
+error_t GetResponse(uint8_t *poll_request, uint8_t slave_id, uint8_t *response, uint8_t *response_length);
+error_t ReadCoil(uint16_t starting_address, uint16_t quantity, uint8_t *no_of_response_bytes, uint8_t *data);
+uint16_t GetIndex(uint16_t address, const uint16_t *data_arr, uint16_t length);
+uint16_t CalculateCRC (uint8_t *buf, size_t len);
