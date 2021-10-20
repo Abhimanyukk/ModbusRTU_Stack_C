@@ -51,5 +51,8 @@ typedef struct __attribute__((packed, scalar_storage_order("big-endian"))) Modbu
 
 error_t GetResponse(uint8_t *poll_request, uint8_t slave_id, uint8_t *response, uint8_t *response_length);
 error_t ReadCoil(uint16_t starting_address, uint16_t quantity, uint8_t *no_of_response_bytes, uint8_t *data);
+error_t ReadHoldingRegister(uint16_t starting_address, uint16_t quantity, uint8_t *no_of_response_bytes, uint8_t *data);
 uint16_t GetIndex(uint16_t address, const uint16_t *data_arr, uint16_t length);
 uint16_t CalculateCRC (uint8_t *buf, size_t len);
+
+void PrintArray(uint8_t *response, uint8_t response_length);

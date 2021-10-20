@@ -3,6 +3,9 @@
 #ifndef DATABASE
     const uint16_t COIL_ADDRESS[]       = {0x1000, 0x1001, 0x1002, 0x1003, 0x1004, 0x1005, 0x1006, 0x1007, 0x1008, 0x1009, 0x100A, 0x100B, 0x100C, 0x100D, 0x100E, 0x100F};
     const bool COIL_STATUS[]            = {true, false, true, true, false, true, true, false, true, true, false, true, true, false, false, true};
+    
+    const uint16_t HOLDING_REGISTER_ADDRESS[]   = {0x2000, 0x2001, 0x2002, 0x2003, 0x2004};
+    const uint16_t HOLDING_REGISTER_DATA[]      = {0xABCD, 0xBCDE, 0xCDEF, 0xDEFA, 0xEFAB};
 #endif // !DATABASE
 
 error_t GetResponse(uint8_t *poll_request, uint8_t slave_id, uint8_t *response, uint8_t *response_length)
@@ -22,7 +25,6 @@ error_t GetResponse(uint8_t *poll_request, uint8_t slave_id, uint8_t *response, 
     uint8_t *buff;
     uint16_t crc_16;
     uint8_t crc_8[2] = {0};
-
     
     switch (modbusRequestFrame.function_code)
     {
@@ -53,6 +55,14 @@ error_t GetResponse(uint8_t *poll_request, uint8_t slave_id, uint8_t *response, 
         break;
 
         case READ_HOLDING_REGISTERS:
+            err_ret = ReadHoldingRegister(modbusRequestFrame.starting_address + MODBUS_REGISTER_OFFSET, modbusRequestFrame.data_or_quantity, &no_of_response_bytes, data);
+            
+            printf ("No of response bytes: %d\n", no_of_response_bytes);
+
+            response[0] = 0x79;
+            response[1] = 0x50;
+
+            *response_length = no_of_response_bytes;
 
         break;
 
@@ -96,6 +106,30 @@ error_t ReadCoil(uint16_t starting_address, uint16_t quantity, uint8_t *no_of_re
     return SUCCESS;
 }
 
+error_t ReadHoldingRegister(uint16_t starting_address, uint16_t quantity, uint8_t *no_of_response_bytes, uint8_t *data)
+{
+    printf ("Read Holding Register\n");
+
+    uint16_t index = GetIndex(starting_address, HOLDING_REGISTER_ADDRESS, sizeof(HOLDING_REGISTER_ADDRESS) / sizeof(HOLDING_REGISTER_ADDRESS[0]));
+    if (index == 0)
+    {
+        return NO_ADDRESS_FOUND;
+    }
+    index--;
+
+    *no_of_response_bytes = quantity * sizeof(uint16_t);
+
+    while (quantity--)
+    {
+        /* code */
+    }
+    
+    data[0] = 78;
+    data[1] = 90;
+
+    return SUCCESS;
+}
+
 uint16_t GetIndex(uint16_t address, const uint16_t *data_arr, uint16_t length)
 {
     for (size_t i = 1; i <= length; i++)
@@ -126,4 +160,14 @@ uint16_t CalculateCRC (uint8_t *buf, size_t len)
     }
     
     return CRC;
+}
+
+void PrintArray(uint8_t *response, uint8_t response_length)
+{
+    while (response_length--)
+    {
+        printf("0x%02x ", *response);
+        *response++;
+    }
+    printf("\n");
 }
